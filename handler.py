@@ -23,11 +23,14 @@ class Phone(Field):
 class Birthday(Field):
     def __init__(self, value: str):
         try:
-            bd_date = datetime.strptime(value, "%d.%m.%Y").date()
+            datetime.strptime(value, "%d.%m.%Y")  # тільки валідація
         except ValueError:
             raise ValueError("Invalid date format. Use DD.MM.YYYY")
         super().__init__(value)
-        self.date = bd_date # Зберігаємо як date для зручності обробки
+
+    @property
+    def date(self):
+        return datetime.strptime(self.value, "%d.%m.%Y").date()
 
 class Record:
     def __init__(self, name: str):
@@ -140,8 +143,6 @@ def change_contact(args, book: AddressBook):
         raise IndexError
     name, old_phone, new_phone, *_ = args
     record = book.find(name)
-    if record is None:
-        raise KeyError("Contact not found.")
     record.edit_phone(old_phone, new_phone)
     return "Phone number updated."
 
@@ -152,8 +153,6 @@ def show_phone(args, book: AddressBook):
         raise IndexError
     name = args[0]
     record = book.find(name)
-    if record is None:
-        raise KeyError("Contact not found.")
     if not record.phones:
         return "No phone numbers for this contact."
     phones = "; ".join(p.value for p in record.phones)
@@ -172,8 +171,6 @@ def add_birthday(args, book: AddressBook):
     
     name, birthday_str, *_ = args
     record = book.find(name)
-    if record is None:
-        raise KeyError("Contact not found. Add contact first.")
     record.add_birthday(birthday_str) 
     return "Birthday added."
 
@@ -185,8 +182,6 @@ def show_birthday(args, book: AddressBook):
 
     name = args[0]
     record = book.find(name)
-    if record is None:
-        raise KeyError("Contact not found.")
     if not record.birthday:
         return "Birthday is not set for this contact."
     return f"{name}'s birthday: {record.birthday.value}"

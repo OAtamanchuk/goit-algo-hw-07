@@ -16,6 +16,9 @@ def input_error(func):
 
         except KeyError as e:
             return str(e) if str(e) else "Contact not found."
+        
+        except AttributeError:
+            return "Contact not found."
 
         except ValueError as e:
             return str(e) 
